@@ -20,7 +20,7 @@ public class MyFirstAutoTest {
          * и ожиданием загрузки страниц в 40 секунд) и открытие сайта РГС*/
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = new ChromeDriver();
-        driver.manage().timeouts().pageLoadTimeout(40, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(120, TimeUnit.SECONDS);
         driver.manage().window().maximize();
 //        Step 1
         driver.get("https://www.rgs.ru");
@@ -43,6 +43,7 @@ public class MyFirstAutoTest {
         String countryP = "text: Name";
         String dateP = " text: BirthDay.repr('moscowRussianDate')";
         String nameP = "text: LastName() + ' ' + FirstName()";
+        Actions actions = new Actions(driver);
 //        Step 2
 //        открытие меню страхование
         WebElement insuranceNavBarButton = findByXpath("//*[@id='main-navbar-collapse']//a[contains(text(), 'Страхование')]");
@@ -74,17 +75,23 @@ public class MyFirstAutoTest {
         fewJourneyButton.click();
 
 //        выбор страны Шенген
+        wait.pollingEvery(Duration.ofMillis(300))
+                .until(ExpectedConditions
+                        .elementToBeClickable(By
+                                .xpath("//input[@class ='form-control-multiple-autocomplete-actual-input tt-input']")));
         WebElement whereWeGoInput = findByXpath("//input[@class ='form-control-multiple-autocomplete-actual-input tt-input']");
         whereWeGoInput.sendKeys(countries);
+        wait.pollingEvery(Duration.ofMillis(300))
+                .until(ExpectedConditions
+                        .elementToBeClickable(By
+                                .xpath("//div[@class = 'tt-menu tt-open']")));
         WebElement shengen = findByXpath("//div[@class = 'tt-menu tt-open']");
         shengen.click();
 
 //        выбор страны Испания
         WebElement selectArrivalCountry = findByXpath("//select[@id = 'ArrivalCountryList']");
         wait.pollingEvery(Duration.ofMillis(300)).until(ExpectedConditions.elementToBeClickable(selectArrivalCountry));
-        selectArrivalCountry.click();
-        selectArrivalCountry.sendKeys("Испания");
-        selectArrivalCountry.click();
+        actions.click(selectArrivalCountry).sendKeys("Испания").click(selectArrivalCountry).perform();
 
 //        выбор даты поездки
         WebElement selectDateOfDeparture = findByXpath("//text()[contains(.,'Дата первой поездки')]//following::input[1]");
@@ -101,7 +108,7 @@ public class MyFirstAutoTest {
         lastNameInput.sendKeys(nameOfUser);
 
 //        Сдвиг вниз к кнопке рассчитать
-        Actions actions = new Actions(driver);
+
         actions.moveToElement(findByXpath("//button[contains(text(),'Рассчитать')]"));
         actions.perform();
 
